@@ -12,23 +12,23 @@ from util import csv_to_dataset, history_points
 
 # dataset
 
-ohlvc_histories, technical_indicators, next_day_open_values, unscaled_y, y_normaliser = csv_to_dataset('MSFT_daily.csv')
+ohlcv_histories, technical_indicators, next_day_open_values, unscaled_y, y_normaliser = csv_to_dataset('MSFT_daily.csv')
 
 test_split = 0.9
-n = int(ohlvc_histories.shape[0] * test_split)
+n = int(ohlcv_histories.shape[0] * test_split)
 
-ohlvc_train = ohlvc_histories[:n]
+ohlcv_train = ohlcv_histories[:n]
 tech_ind_train = technical_indicators[:n]
 y_train = next_day_open_values[:n]
 
-ohlvc_test = ohlvc_histories[n:]
+ohlcv_test = ohlcv_histories[n:]
 tech_ind_test = technical_indicators[n:]
 y_test = next_day_open_values[n:]
 
 unscaled_y_test = unscaled_y[n:]
 
-print(ohlvc_train.shape)
-print(ohlvc_test.shape)
+print(ohlcv_train.shape)
+print(ohlcv_test.shape)
 
 
 # model architecture
@@ -59,14 +59,14 @@ z = Dense(1, activation="linear", name='dense_out')(z)
 model = Model(inputs=[lstm_branch.input, technical_indicators_branch.input], outputs=z)
 adam = optimizers.Adam(lr=0.0005)
 model.compile(optimizer=adam, loss='mse')
-model.fit(x=[ohlvc_train, tech_ind_train], y=y_train, batch_size=32, epochs=50, shuffle=True, validation_split=0.1)
+model.fit(x=[ohlcv_train, tech_ind_train], y=y_train, batch_size=32, epochs=50, shuffle=True, validation_split=0.1)
 
 
 # evaluation
 
-y_test_predicted = model.predict([ohlvc_test, tech_ind_test])
+y_test_predicted = model.predict([ohlcv_test, tech_ind_test])
 y_test_predicted = y_normaliser.inverse_transform(y_test_predicted)
-y_predicted = model.predict([ohlvc_histories, technical_indicators])
+y_predicted = model.predict([ohlcv_histories, technical_indicators])
 y_predicted = y_normaliser.inverse_transform(y_predicted)
 assert unscaled_y_test.shape == y_test_predicted.shape
 real_mse = np.mean(np.square(unscaled_y_test - y_test_predicted))

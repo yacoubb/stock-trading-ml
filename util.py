@@ -16,7 +16,7 @@ def csv_to_dataset(csv_path):
     data_normalised = data_normaliser.fit_transform(data)
 
     # using the last {history_points} open close high low volume data points, predict the next open value
-    ohlvc_histories_normalised = np.array([data_normalised[i:i + history_points].copy() for i in range(len(data_normalised) - history_points)])
+    ohlcv_histories_normalised = np.array([data_normalised[i:i + history_points].copy() for i in range(len(data_normalised) - history_points)])
     next_day_open_values_normalised = np.array([data_normalised[:, 0][i + history_points].copy() for i in range(len(data_normalised) - history_points)])
     next_day_open_values_normalised = np.expand_dims(next_day_open_values_normalised, -1)
 
@@ -37,7 +37,7 @@ def csv_to_dataset(csv_path):
         return ema_values[-1]
 
     technical_indicators = []
-    for his in ohlvc_histories_normalised:
+    for his in ohlcv_histories_normalised:
         # note since we are using his[3] we are taking the SMA of the closing price
         sma = np.mean(his[:, 3])
         macd = calc_ema(his, 12) - calc_ema(his, 26)
@@ -49,30 +49,30 @@ def csv_to_dataset(csv_path):
     tech_ind_scaler = preprocessing.MinMaxScaler()
     technical_indicators_normalised = tech_ind_scaler.fit_transform(technical_indicators)
 
-    assert ohlvc_histories_normalised.shape[0] == next_day_open_values_normalised.shape[0] == technical_indicators_normalised.shape[0]
-    return ohlvc_histories_normalised, technical_indicators_normalised, next_day_open_values_normalised, next_day_open_values, y_normaliser
+    assert ohlcv_histories_normalised.shape[0] == next_day_open_values_normalised.shape[0] == technical_indicators_normalised.shape[0]
+    return ohlcv_histories_normalised, technical_indicators_normalised, next_day_open_values_normalised, next_day_open_values, y_normaliser
 
 
 def multiple_csv_to_dataset(test_set_name):
     import os
-    ohlvc_histories = 0
+    ohlcv_histories = 0
     technical_indicators = 0
     next_day_open_values = 0
     for csv_file_path in list(filter(lambda x: x.endswith('daily.csv'), os.listdir('./'))):
         if not csv_file_path == test_set_name:
             print(csv_file_path)
-            if type(ohlvc_histories) == int:
-                ohlvc_histories, technical_indicators, next_day_open_values, _, _ = csv_to_dataset(csv_file_path)
+            if type(ohlcv_histories) == int:
+                ohlcv_histories, technical_indicators, next_day_open_values, _, _ = csv_to_dataset(csv_file_path)
             else:
                 a, b, c, _, _ = csv_to_dataset(csv_file_path)
-                ohlvc_histories = np.concatenate((ohlvc_histories, a), 0)
+                ohlcv_histories = np.concatenate((ohlcv_histories, a), 0)
                 technical_indicators = np.concatenate((technical_indicators, b), 0)
                 next_day_open_values = np.concatenate((next_day_open_values, c), 0)
 
-    ohlvc_train = ohlvc_histories
+    ohlcv_train = ohlcv_histories
     tech_ind_train = technical_indicators
     y_train = next_day_open_values
 
-    ohlvc_test, tech_ind_test, y_test, unscaled_y_test, y_normaliser = csv_to_dataset(test_set_name)
+    ohlcv_test, tech_ind_test, y_test, unscaled_y_test, y_normaliser = csv_to_dataset(test_set_name)
 
-    return ohlvc_train, tech_ind_train, y_train, ohlvc_test, tech_ind_test, y_test, unscaled_y_test, y_normaliser
+    return ohlcv_train, tech_ind_train, y_train, ohlcv_test, tech_ind_test, y_test, unscaled_y_test, y_normaliser

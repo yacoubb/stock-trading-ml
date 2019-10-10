@@ -11,21 +11,21 @@ from util import csv_to_dataset, history_points
 
 # dataset
 
-ohlvc_histories, _, next_day_open_values, unscaled_y, y_normaliser = csv_to_dataset('MSFT_daily.csv')
+ohlcv_histories, _, next_day_open_values, unscaled_y, y_normaliser = csv_to_dataset('MSFT_daily.csv')
 
 test_split = 0.9
-n = int(ohlvc_histories.shape[0] * test_split)
+n = int(ohlcv_histories.shape[0] * test_split)
 
-ohlvc_train = ohlvc_histories[:n]
+ohlcv_train = ohlcv_histories[:n]
 y_train = next_day_open_values[:n]
 
-ohlvc_test = ohlvc_histories[n:]
+ohlcv_test = ohlcv_histories[n:]
 y_test = next_day_open_values[n:]
 
 unscaled_y_test = unscaled_y[n:]
 
-print(ohlvc_train.shape)
-print(ohlvc_test.shape)
+print(ohlcv_train.shape)
+print(ohlcv_test.shape)
 
 
 # model architecture
@@ -41,14 +41,14 @@ output = Activation('linear', name='linear_output')(x)
 model = Model(inputs=lstm_input, outputs=output)
 adam = optimizers.Adam(lr=0.0005)
 model.compile(optimizer=adam, loss='mse')
-model.fit(x=ohlvc_train, y=y_train, batch_size=32, epochs=50, shuffle=True, validation_split=0.1)
+model.fit(x=ohlcv_train, y=y_train, batch_size=32, epochs=50, shuffle=True, validation_split=0.1)
 
 
 # evaluation
 
-y_test_predicted = model.predict(ohlvc_test)
+y_test_predicted = model.predict(ohlcv_test)
 y_test_predicted = y_normaliser.inverse_transform(y_test_predicted)
-y_predicted = model.predict(ohlvc_histories)
+y_predicted = model.predict(ohlcv_histories)
 y_predicted = y_normaliser.inverse_transform(y_predicted)
 
 assert unscaled_y_test.shape == y_test_predicted.shape
