@@ -19,7 +19,7 @@ A stock trading bot that uses machine learning to make price predictions.
 
 [Blog Post](https://yacoubahmed.me/blog/stock-prediction-ml)
 
-[Medium Article]()
+[Medium Article](https://medium.com/towards-data-science/getting-rich-quick-with-machine-learning-and-stock-market-predictions-696802da94fe)
 
 ## Train your own model
 
