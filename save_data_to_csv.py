@@ -11,7 +11,7 @@ def save_dataset(symbol, time_window):
     ts = TimeSeries(key=api_key, output_format='pandas')
     if time_window == 'intraday':
         data, meta_data = ts.get_intraday(
-            symbol='MSFT', interval='1min', outputsize='full')
+            symbol='AAPL', interval='1min', outputsize='full')
     elif time_window == 'daily':
         data, meta_data = ts.get_daily(symbol, outputsize='full')
     elif time_window == 'daily_adj':
@@ -20,6 +20,7 @@ def save_dataset(symbol, time_window):
     pprint(data.head(10))
 
     data.to_csv(f'./{symbol}_{time_window}.csv')
+    data.to_csv("gs://spstockprices1/AAPL_daily.csv")
 
 
 if __name__ == "__main__":

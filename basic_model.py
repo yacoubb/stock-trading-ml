@@ -4,14 +4,18 @@ from keras.layers import Dense, Dropout, LSTM, Input, Activation
 from keras import optimizers
 import numpy as np
 np.random.seed(4)
-from tensorflow import set_random_seed
-set_random_seed(4)
+#from tensorflow import set_random_seed
+#set_random_seed(4)
+import tensorflow
+tensorflow.random.set_seed(4)
 from util import csv_to_dataset, history_points
+from tensorflow import keras
+import tensorflow as tf
 
 
 # dataset
 
-ohlcv_histories, _, next_day_open_values, unscaled_y, y_normaliser = csv_to_dataset('MSFT_daily.csv')
+ohlcv_histories, _, next_day_open_values, unscaled_y, y_normaliser = csv_to_dataset('AAPL_daily.csv')
 
 test_split = 0.9
 n = int(ohlcv_histories.shape[0] * test_split)
@@ -39,7 +43,7 @@ x = Dense(1, name='dense_1')(x)
 output = Activation('linear', name='linear_output')(x)
 
 model = Model(inputs=lstm_input, outputs=output)
-adam = optimizers.Adam(lr=0.0005)
+adam = tf.optimizers.Adam(lr=0.0005)
 model.compile(optimizer=adam, loss='mse')
 model.fit(x=ohlcv_train, y=y_train, batch_size=32, epochs=50, shuffle=True, validation_split=0.1)
 
